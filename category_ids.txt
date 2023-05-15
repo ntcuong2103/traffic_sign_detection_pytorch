@@ -1,0 +1,7 @@
+1	Cấm ngược chiều
+2	Cấm dừng và đỗ
+3	Cấm rẽ
+4	Giới hạn tốc độ
+5	Cấm còn lại
+6	Nguy hiểm
+7	Hiệu lệnh
