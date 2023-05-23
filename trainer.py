@@ -6,12 +6,17 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 if __name__ == "__main__":
     model = DetectionModelTrainer(
         dict_file = "category_ids.txt",
-        lr = 1e-3,
+        lr = 1e-4,
         momentum = 0.9,
         weight_decay = 1e-4,        
-    ).load_from_checkpoint('checkpoint/zalo-faster-rcnn/lightning_logs/version_16/checkpoints/epoch=1-val_map=0.5075.ckpt')
+    ).load_from_checkpoint('checkpoint/zalo-faster-rcnn/lightning_logs/version_40/checkpoints/epoch=0-val_map=0.0000.ckpt')
+    # import torch
+    # from collections import OrderedDict
+    # checkpoint = torch.load('checkpoint/zalo-faster-rcnn/lightning_logs/version_26/checkpoints/epoch=30-val_map=0.3509.ckpt', map_location='cpu')
+    # model.model.backbone.load_state_dict(OrderedDict({k.replace('model.backbone.', ''):v for k, v in checkpoint['state_dict'].items() 
+    #                                                   if 'model.backbone.' in k}))
 
-    dm = TSD_Data(batch_size=30)
+    dm = TSD_Data(batch_size=30, workers=15)
 
 
     trainer = Trainer(
@@ -21,7 +26,6 @@ if __name__ == "__main__":
             ModelCheckpoint(filename='{epoch}-{val_map:.4f}', save_top_k=5, monitor='val_map', mode='max'),
         ], 
         check_val_every_n_epoch=1,
-        reload_dataloaders_every_n_epochs=1,
         fast_dev_run=False,
         default_root_dir='checkpoint/zalo-faster-rcnn',
 

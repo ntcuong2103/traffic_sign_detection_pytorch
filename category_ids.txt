@@ -1,7 +1,7 @@
-1	Cấm ngược chiều
-2	Cấm dừng và đỗ
-3	Cấm rẽ
-4	Giới hạn tốc độ
-5	Cấm còn lại
-6	Nguy hiểm
-7	Hiệu lệnh
+1	Cam nguoc chieu
+2	Cam dung va do
+3	Cam re
+4	Gioi han toc do
+5	Cam con lai
+6	Nguy hiem
+7	Hieu lenh

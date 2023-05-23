@@ -25,7 +25,7 @@ def visualize_bbox(img, bbox, class_name, score, color=BOX_COLOR, thickness=2):
     return img
 
 
-def visualize(image, bboxes, category_ids, category_id_to_name, scores):
+def visualize(image, bboxes, category_ids, category_id_to_name, scores, index):
     img = image.copy()
     for bbox, category_id, score in zip(bboxes, category_ids, scores):
         class_name = category_id_to_name[category_id]
@@ -33,4 +33,4 @@ def visualize(image, bboxes, category_ids, category_id_to_name, scores):
     # plt.figure(figsize=(12, 12))
     # plt.axis('off')
     # plt.imshow(img)
-    cv2.imwrite('test.png', img)
+    cv2.imwrite(f'test_{index}.png', img)
