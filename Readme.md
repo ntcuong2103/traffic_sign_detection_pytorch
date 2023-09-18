@@ -13,6 +13,6 @@ Check out [faster_rcnn.py](faster_rcnn.py)
 
 Check out [data.py](data.py)
 
-- Load ZaloAI data
+- Load [ZaloAI data](https://www.kaggle.com/phhasian0710/za-traffic-2020/download) 
 - Skip small traffic sign
 
