@@ -4,7 +4,7 @@ import pandas as pd
 import torch
 import torchvision
 
-device = torch.device('cuda', 2)
+device = torch.device('cuda', 0)
 
 category_id2name = {line.strip().split('\t')[0]:line.strip().split('\t')[1] 
                    for line in open('category_ids.txt').readlines()}
@@ -37,11 +37,11 @@ def run_prediction(model, img, index):
     with torch.no_grad():
         prediction = model([img.to(device)])[0]
 
-    print('predicted #boxes: ', len(prediction['labels']))
+    # print('predicted #boxes: ', len(prediction['labels']))
     
     prediction = apply_nms(prediction, min_score=0.5)
         
-    print('predicted #boxes after processing: ', len(prediction['labels']))
+    # print('predicted #boxes after processing: ', len(prediction['labels']))
 
     bboxes = [list(box[:2]) + [box[2] - box[0]] + [box[3] - box[1]] for box in prediction['boxes'].cpu().numpy()]
 
@@ -58,6 +58,35 @@ def run_prediction(model, img, index):
     #           category_ids = prediction['labels'].cpu().numpy().tolist(), 
     #           category_id_to_name = [''] * 10, scores = [score.cpu().numpy() for score in prediction['scores']], index=index)
 
+def run_detection(input_fn, output_fn, model):
+    import cv2
+    import numpy as np
+
+    cap = cv2.VideoCapture(input_fn)
+ 
+    index = 0
+    # Loop until the end of the video
+    annotations_list = []
+    while (cap.isOpened()):
+        index +=  1
+    
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+        if frame is None: break
+
+        # if index %10 != 1: 
+        #     continue
+
+        image = frame.astype(np.float32)
+        image /= 255.0
+
+        image = torch.as_tensor(image, dtype=torch.float32).permute(2, 0, 1)
+
+        annotations_list.append( {'id' : index, 'objects': run_prediction(model, image, index)}) 
+
+    import json
+    with open(output_fn, 'w') as f:
+        f.write(json.dumps([annotations for annotations in annotations_list], cls=CustomEncoder))
 
 if __name__ == "__main__":
     model = DetectionModelTrainer(
@@ -72,35 +101,20 @@ if __name__ == "__main__":
                                       )
     model.cuda(device)
     model.eval()
-    import cv2
-    import numpy as np
-    input_dir = 'input_videos'
 
-    cap = cv2.VideoCapture('input_videos/8269400377657974270.mp4')
- 
-    index = 0
-    # Loop until the end of the video
-    annotations_list = []
-    while (cap.isOpened()):
-        index +=  1
-    
-        # Capture frame-by-frame
-        ret, frame = cap.read()
-        if frame is None: break
+    input_dir = 'detection_data/DVR'
+    output_dir = 'detection_data/DVR_json'
 
-        if index %10 != 1: 
-            continue
+    import os
+    os.makedirs(output_dir, exist_ok=True)
+    from tqdm import tqdm
 
-        image = frame.astype(np.float32)
-        image /= 255.0
+    for fn in tqdm(os.listdir(input_dir)[:]):
+        run_detection(os.path.join(input_dir, fn),
+                      os.path.join(output_dir, fn.replace('.avi', '.json')),
+                      model 
+        )
 
-        image = torch.as_tensor(image, dtype=torch.float32).permute(2, 0, 1)
-
-        annotations_list.append( {'id' : index, 'objects': run_prediction(model, image, index)}) 
-
-    import json
-    with open('annotations.json', 'w') as f:
-        f.write(json.dumps([annotations for annotations in annotations_list], cls=CustomEncoder))
 
     # for index, fn in enumerate(os.listdir(input_dir)):
     #     image = cv2.imread(f'{input_dir}/{fn}', cv2.IMREAD_COLOR).astype(np.float32)
